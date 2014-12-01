@@ -57,7 +57,7 @@ module Tire
       def function_score(options={}, &block)
         @function_score ||= Query.new(&block);
         @value[:function_score] ||= {}
-        @value[:function_score][:functions] = [{ :script_score => options }]
+        @value[:function_score][:functions] = [{ :script_score => options.merge(lang: :groovy) }]
         @value[:function_score][:boost_mode] = "replace"
         @value[:function_score].update({:query => @function_score.to_hash}) 
         @value
