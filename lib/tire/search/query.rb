@@ -54,14 +54,19 @@ module Tire
       # http://www.elasticsearch.org/guide/en/elasticsearch/reference/0.90/query-dsl-custom-score-query.html
       # http://www.elasticsearch.org/guide/en/elasticsearch/reference/0.90/query-dsl-function-score-query.html
       #
-      def function_score(options={}, &block)
-        @function_score ||= Query.new(&block);
+      def function_score(function_array = [], options = {}, &block)
         @value[:function_score] ||= {}
-        @value[:function_score][:functions] = [{ :script_score => options.merge(lang: :groovy) }]
-        @value[:function_score][:boost_mode] = "replace"
-        @value[:function_score].update({:query => @function_score.to_hash}) 
+        
+        @function_score ||= Query.new(&block)
+        @value[:function_score].update({:query => @function_score.to_hash})         
+                
+        @value[:function_score][:functions] ||= function_array
+        #@value[:function_score][:functions] << { :script_score => options.merge(lang: :groovy) }
+        @value[:function_score][:boost_mode] = (options[:boost_mode] || "replace")
+        @value[:function_score][:score_mode] = (options[:score_mode] || "multiply")
+        
         @value
-      end
+      end      
 
       def constant_score(&block)
         @value.update( { :constant_score => ConstantScoreQuery.new(&block).to_hash } ) if block_given?
